@@ -1,9 +1,16 @@
 Deno.serve(async (req: Request) => {
   const myHeaders = new Headers();
-  myHeaders.append("Content-Type", "application/json");
-  myHeaders.append('Access-Control-Allow-Origin','*');
-  myHeaders.append('Access-Control-Allow-Methods','GET, POST, PATCH, PUT, DELETE, OPTIONS');
-  myHeaders.append('Access-Control-Allow-Headers','Origin, Content-Type, X-Auth-Token');
+  if (req.method ==
+    "OPTIONS") {
+
+      return new Response("Preflight OK!", {
+          status: 200,
+          headers: {
+              "Access-Control-Allow-Origin": "*",
+              "Access-Control-Allow-Headers": "content-type"
+          }
+      });
+  }
 
   let word2:string = "";
 
