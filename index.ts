@@ -2,10 +2,12 @@ Deno.serve(async (req: Request) => {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
+  let word2:string|null = "";
+
   // Extract guess GET parameter 
   try {
     const url = new URL(req.url);
-    const word2 = url.searchParams.get("guess");
+    word2 = url.searchParams.get("guess");
     console.log(word2);
   } catch (error) {
     console.error("Error:", error);
