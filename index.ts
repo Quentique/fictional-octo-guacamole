@@ -1,60 +1,37 @@
+Deno.serve(async (req: Request) => {
+  const myHeaders = new Headers();
+  myHeaders.append("Content-Type", "application/json");
 
-async function handler(_req: Request): Promise<Response> {
-  try {
-    const wordToFind = "chien";
-    const guess = await extractGuess(_req);
-    const similarityResult = await similarity(guess, wordToFind);
-    console.log(
-      `Tried with word ${guess}, similarity is ${similarityResult}, word to find is ${wordToFind}`
-    );
-    return new Response(responseBuilder(guess, similarityResult));
-  } catch (e) {
-    console.error(e);
-    return new Response("An error occured : ", e);
-  }
-}
+  const raw = JSON.stringify({
+      "word1": "centrale",
+      "word2": "supelec"
+  });
 
-const extractGuess = async (req: Request) => {
-  const slackPayload = await req.formData();
-  const guess = slackPayload.get("text")?.toString();
-  if (!guess) {
-    throw Error("Guess is empty or null");
-  }
-  return guess;
-};
-
-const responseBuilder = (word: string, similarity: Number) => {
-  if (similarity == 1) {
-    return `Well played ! The word was ${word}.`;
-  } else if (similarity > 0.5) {
-    return `${word} is very close to the word, score : ${similarity}`;
-  } else if (similarity < 0.5) {
-    return `${word} is quite far to the word, score : ${similarity}`;
-  }
-};
-
-const similarity = async (word1, word2) => {
-  const body = {
-    sim1: word1,
-    sim2: word2,
-    lang: "fr",
-    type: "General Word2Vec",
-  };
-  console.log("body", body);
-  const similarityResponse = await fetch(
-    "<http://nlp.polytechnique.fr/similarityscore>",
-    {
+  const requestOptions = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    }
-  );
-  console.log("similarityResponse", similarityResponse);
-  const similarityResponseJson = await similarityResponse.json();
-  console.log("similarityValue", similarityResponseJson);
-  return Number(similarityResponseJson.simscore);
-};
-Deno.serve(handler);
+      headers: myHeaders,
+      body: raw,
+      redirect: "follow"
+  };
 
+  try {
+      const response = await fetch("http://word2vec.nicolasfley.fr/similarity", requestOptions);
+      
+      if (!response.ok) {
+          console.error(`Error: ${response.statusText}`);
+          return new Response(`Error: ${response.statusText}`, { status: response.status });
+      }
+
+      const result = await response.json();
+
+      console.log(result);
+      return new Response(JSON.stringify(result), {
+          headers: { "Content-Type": "application/json" },
+          status: 200
+      });
+      
+  } catch (error) {
+      console.error("Fetch error:", error);
+      return new Response(`Error: ${error.message}`, { status: 500 });
+  }
+});
