@@ -2,9 +2,14 @@ Deno.serve(async (req: Request) => {
   const myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/json");
 
+  // Extract guess GET parameter 
+  const url = new URL(req.url);
+  const word2 = url.searchParams.get("guess");
+
+
   const raw = JSON.stringify({
       "word1": "centrale",
-      "word2": "supelec"
+      "word2": word2
   });
 
   const requestOptions = {
