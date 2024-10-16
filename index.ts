@@ -3,9 +3,14 @@ Deno.serve(async (req: Request) => {
   myHeaders.append("Content-Type", "application/json");
 
   // Extract guess GET parameter 
-  const url = new URL(req.url);
-  const word2 = url.searchParams.get("guess");
-
+  try {
+    const url = new URL(req.url);
+    const word2 = url.searchParams.get("guess");
+    console.log(word2);
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(`Error: ${error.message}`, { status: 400 });
+  }
 
   const raw = JSON.stringify({
       "word1": "centrale",
